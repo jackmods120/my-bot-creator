@@ -4,39 +4,40 @@ const app = express();
 
 app.use(express.json());
 
-// وەڵامدانەوەی لاپەڕەی سەرەکی
+// Main endpoint
 app.get('/', (req, res) => {
-    res.status(200).send('Server is Running! 🚀');
+    res.status(200).send('Creator Bot Server is running 🚀');
 });
 
-// ئەم بەشە وەڵامی هەموو جۆرە داواکارییەک دەداتەوە (دروستکردنی بۆت)
-app.all('/create-bot', async (req, res) => {
-    // ئەگەر بەرنامەکە زانیاری ناردبوو
-    const data = req.body || {};
-    const token = data.token;
+// Endpoint that Sketchware is ACTUALLY calling
+app.post('/api/register_bot', async (req, res) => {
+    const { token } = req.body;
 
     if (!token) {
-        return res.status(400).json({ ok: false, error: "Token required" });
+        return res.status(400).json({ ok: false, error: "توکێن نەنێردراوە" });
     }
 
     try {
         const response = await axios.get(`https://api.telegram.org/bot${token}/getMe`);
+        
         if (response.data.ok) {
+            const botInfo = response.data.result;
             return res.status(200).json({ 
                 ok: true, 
-                bot_id: response.data.result.id,
-                username: response.data.result.username 
+                bot_id: botInfo.id
             });
+        } else {
+            return res.status(400).json({ ok: false, error: "توکێنەکە لەلایەن تیلیگرامەوە ڕەتکرایەوە" });
         }
-        res.status(400).json({ ok: false, error: "Invalid Token" });
     } catch (e) {
-        res.status(500).json({ ok: false, error: "Telegram API Error" });
+        return res.status(500).json({ ok: false, error: "ناتوانرێت پەیوەندی بە سێرڤەری تیلیگرامەوە بکرێت" });
     }
 });
 
-// بۆ ئەوەی ئیرۆری 404 نەدات لە هیچ لینکێکدا
-app.use((req, res) => {
-    res.status(200).json({ ok: true, message: "Server is alive" });
-});
+// Dummy endpoints to prevent errors
+app.post('/api/delete_bot', (req, res) => res.json({ ok: true }));
+app.post('/api/update_setting', (req, res) => res.json({ ok: true }));
+app.post('/api/broadcast', (req, res) => res.json({ ok: true }));
+app.get('/api/stats', (req, res) => res.json({ ok: true, users: 0, bots: 0 }));
 
 module.exports = app;

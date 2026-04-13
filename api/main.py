@@ -25,7 +25,7 @@ EMOJIS = [
     "🤗","🫡","🎩","🤫","😶","🌿","🤭","🫢","🤝","🦾",
     "🙃","🫠","☕","👋","🫶",
 ]
-PHOTO_URL    = "https://jobin-bro-143-02-7e44d11483ed.herokuapp.com//dl/24585?code=21c8667075cad1c405c844a32363059fc6f15bd353cfbea4"
+PHOTO_URL    = "https://j4ustin-03-3fc6bf0e63b7.herokuapp.com//dl/75523?code=8d9af614a362896e98ecc5c80c4b6f02f8ee81c5abe7c270"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

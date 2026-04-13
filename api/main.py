@@ -1,7 +1,7 @@
 import os, logging, httpx, asyncio, random, html, re, json
 from datetime import datetime
 from fastapi import FastAPI, Request
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -178,27 +178,17 @@ async def send_force_join_msg(update: Update, not_joined: list):
 # ══════════════════════════════════════════════════════════════════════════════
 
 # ── مینیوی سەرەکی ──────────────────────────────────────────────────────────
-def kb_main(uid: int) -> InlineKeyboardMarkup:
+def kb_main(uid: int) -> ReplyKeyboardMarkup:
     if uid == OWNER_ID:
-        return InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton("➕ دروستکردنی بۆتی نوێ", callback_data="main_create"),
-                InlineKeyboardButton("📂 بۆتەکانم", callback_data="main_list")
-            ],
-            [
-                InlineKeyboardButton("👑 پانێلی سەرەکی", callback_data="main_owner"),
-                InlineKeyboardButton("📊 ئامارەکان", callback_data="main_stats")
-            ]
-        ])
-    return InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("➕ دروستکردنی بۆتی نوێ", callback_data="main_create"),
-            InlineKeyboardButton("📂 بۆتەکانم", callback_data="main_list")
-        ],
-        [
-            InlineKeyboardButton("📊 ئامارەکانم", callback_data="main_stats")
-        ]
-    ])
+        return ReplyKeyboardMarkup([
+            [KeyboardButton("➕ دروستکردنی بۆتی نوێ"),  KeyboardButton("📂 بۆتەکانم")],
+            [KeyboardButton("👑 پانێلی سەرەکی"),         KeyboardButton("📊 ئامارەکان")],
+        ], resize_keyboard=True)
+    # پشکنینی ئەیا ئەدمینە
+    return ReplyKeyboardMarkup([
+        [KeyboardButton("➕ دروستکردنی بۆتی نوێ"), KeyboardButton("📂 بۆتەکانم")],
+        [KeyboardButton("📊 ئامارەکانم")],
+    ], resize_keyboard=True)
 
 def kb_main_admin(uid: int) -> ReplyKeyboardMarkup:
     """کیبۆردی ئەدمین"""
@@ -208,35 +198,17 @@ def kb_main_admin(uid: int) -> ReplyKeyboardMarkup:
     ], resize_keyboard=True)
 
 # ── کۆنترۆڵی بۆت ─────────────────────────────────────────────────────────
-def kb_control(uid: int) -> InlineKeyboardMarkup:
+def kb_control(uid: int) -> ReplyKeyboardMarkup:
     rows = [
-        [
-            InlineKeyboardButton("▶️ دەستپێکردن", callback_data="ctrl_start"),
-            InlineKeyboardButton("⏸ وەستاندن", callback_data="ctrl_stop")
-        ],
-        [
-            InlineKeyboardButton("🔄 نوێکردنەوە", callback_data="ctrl_restart"),
-            InlineKeyboardButton("📋 زانیاری بۆت", callback_data="ctrl_info")
-        ],
-        [
-            InlineKeyboardButton("✏️ گۆڕینی بەخێرهاتن", callback_data="ctrl_edit_welcome"),
-            InlineKeyboardButton("📨 پەیام بۆ بەکارهێنەران", callback_data="ctrl_broadcast")
-        ],
-        [
-            InlineKeyboardButton("🔔 ئاگادارکردنەوەی /start", callback_data="ctrl_notif_on"),
-            InlineKeyboardButton("🔕 کوژاندنی ئاگادارکردنەوە", callback_data="ctrl_notif_off")
-        ],
-        [
-            InlineKeyboardButton("🗑 سڕینەوەی بۆت", callback_data="ctrl_delete"),
-            InlineKeyboardButton("🔙 گەڕانەوە بۆ لیست", callback_data="ctrl_back_list")
-        ]
+        [KeyboardButton("▶️ دەستپێکردن"),           KeyboardButton("⏸ وەستاندن")],
+        [KeyboardButton("🔄 نوێکردنەوە"),            KeyboardButton("📋 زانیاری بۆت")],
+        [KeyboardButton("✏️ گۆڕینی بەخێرهاتن"),    KeyboardButton("📨 پەیام بۆ بەکارهێنەران")],
+        [KeyboardButton("🔔 ئاگادارکردنەوەی /start"), KeyboardButton("🔕 کوژاندنی ئاگادارکردنەوە")],
+        [KeyboardButton("🗑 سڕینەوەی بۆت"),          KeyboardButton("🔙 گەڕانەوە بۆ لیست")],
     ]
     if uid == OWNER_ID:
-        rows.insert(4, [
-            InlineKeyboardButton("🔑 گۆڕینی تۆکێن", callback_data="ctrl_change_token"),
-            InlineKeyboardButton("🔗 نوێکردنەوەی وەبهووک", callback_data="ctrl_webhook")
-        ])
-    return InlineKeyboardMarkup(rows)
+        rows.insert(4, [KeyboardButton("🔑 گۆڕینی تۆکێن"), KeyboardButton("🔗 نوێکردنەوەی وەبهووک")])
+    return ReplyKeyboardMarkup(rows, resize_keyboard=True)
 
 # ── پانێلی سەرەکی (Owner) — مینیو ─────────────────────────────────────────
 KB_OWNER_MAIN = ReplyKeyboardMarkup([
@@ -448,9 +420,8 @@ async def handle_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🚫 دەستت لە بۆتەکە گرتراوە.")
         return
 
+    # ── سڕینەوەی هەموو نامەکانی بۆت (دانە دانە) ─────────────────────────
     await delete_all_bot_msgs(ctx, uid)
-
-    # 1. سەرەتا ئەم if ـە دابنێ تا پشکنینی جۆین کار بکات
     if txt == "🔄 پشکنینی دووبارە":
         if uid != OWNER_ID and not await is_admin(uid):
             joined, not_joined = await check_force_join(uid)
@@ -461,10 +432,6 @@ async def handle_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         else:
             await master_start(update, ctx)
         return
-
-    # 2. دواتر بۆ هەر پەیامێکی تر، ئەم دوو دێڕە جێبەجێ دەبێت
-    await update.message.reply_text("👇 تکایە دوگمەکانی خوارەوە بەکاربهێنە:", reply_markup=kb_main(uid))
-    return
 
     # ── ناڤیگەیشنی گشتی ───────────────────────────────────────────────────
     if txt == "🔙 گەڕانەوە بۆ سەرەتا":
@@ -3183,65 +3150,6 @@ master_app = ApplicationBuilder().token(MASTER_TOKEN).build()
 master_app.add_handler(CommandHandler("start", master_start))
 master_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
-async def handle_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    data = query.data
-    uid = query.from_user.id
-
-    # دروستکردنی Updateێکی ساختە بۆ فەنکشنە کۆنەکان
-    fake_update = Update(update.update_id)
-    fake_update._effective_user = query.from_user
-    fake_update._effective_chat = query.message.chat
-    fake_update._message = query.message
-
-    # ── کیبۆردی سەرەکی ─────────────────────────────────────────────
-    if data == "main_create":
-        await db_put(f"users/{uid}/state", "choose_bot_type")
-        await query.message.reply_text(
-            "🤖 جۆری بۆتەکەت هەڵبژێرە",
-            reply_markup=KB_BOT_TYPE
-        )
-    elif data == "main_list":
-        await show_bot_list(fake_update, uid)
-    elif data == "main_owner":
-        await show_owner_main(fake_update, uid)
-    elif data == "main_stats":
-        await show_stats(fake_update, uid)
-
-    # ── کیبۆردی کۆنترۆڵ ─────────────────────────────────────────────
-    elif data.startswith("ctrl_"):
-        bid = await db_get(f"users/{uid}/selected_bot")
-        if not bid:
-            await query.message.reply_text("⚠️ سەرەتا بۆتێک هەڵبژێرە.", reply_markup=kb_main(uid))
-            return
-        if data == "ctrl_start":
-            await handle_control(fake_update, uid, "▶️ دەستپێکردن")
-        elif data == "ctrl_stop":
-            await handle_control(fake_update, uid, "⏸ وەستاندن")
-        elif data == "ctrl_restart":
-            await handle_control(fake_update, uid, "🔄 نوێکردنەوە")
-        elif data == "ctrl_info":
-            await handle_control(fake_update, uid, "📋 زانیاری بۆت")
-        elif data == "ctrl_edit_welcome":
-            await handle_control(fake_update, uid, "✏️ گۆڕینی بەخێرهاتن")
-        elif data == "ctrl_broadcast":
-            await handle_control(fake_update, uid, "📨 پەیام بۆ بەکارهێنەران")
-        elif data == "ctrl_notif_on":
-            await handle_control(fake_update, uid, "🔔 ئاگادارکردنەوەی /start")
-        elif data == "ctrl_notif_off":
-            await handle_control(fake_update, uid, "🔕 کوژاندنی ئاگادارکردنەوە")
-        elif data == "ctrl_delete":
-            await handle_control(fake_update, uid, "🗑 سڕینەوەی بۆت")
-        elif data == "ctrl_back_list":
-            await show_bot_list(fake_update, uid)
-        elif data == "ctrl_change_token" and uid == OWNER_ID:
-            await handle_control(fake_update, uid, "🔑 گۆڕینی تۆکێن")
-        elif data == "ctrl_webhook" and uid == OWNER_ID:
-            await handle_control(fake_update, uid, "🔗 نوێکردنەوەی وەبهووک")
-
-master_app.add_handler(CallbackQueryHandler(handle_callback))
-
 
 @app.post("/api/main")
 async def master_route(request: Request):
@@ -3261,4 +3169,4 @@ async def child_route(request: Request, token: str):
 
 @app.get("/api/main")
 async def health():
-    return {"status": "active", "keep_alive": "✅"}
+    return {"status":"active","keep_alive":"✅"}

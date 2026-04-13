@@ -2,18 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.py",
+      "src": "api/main.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
-    { "src": "/ping", "dest": "/api/ping.py" },
-    { "src": "/api/register_bot", "dest": "/api/register_bot.py" },
-    { "src": "/api/delete_bot", "dest": "/api/delete_bot.py" },
-    { "src": "/api/update_setting", "dest": "/api/update_setting.py" },
-    { "src": "/api/broadcast", "dest": "/api/broadcast.py" },
-    { "src": "/api/stats", "dest": "/api/stats.py" },
-    { "src": "/api/main", "dest": "/api/main_webhook.py" },
-    { "src": "/api/bot/(.*)", "dest": "/api/child_webhook.py" }
+    {
+      "src": "/api/(.*)",
+      "dest": "api/main.py"
+    }
   ]
 }

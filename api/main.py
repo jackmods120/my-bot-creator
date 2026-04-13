@@ -47,7 +47,7 @@ STRINGS: dict = {
     # ── پانێلی یەکگرتوو ──────────────────────────────────────────────────────
     "panel_header": {
         "ku": "⚙️ پانێڵی کۆنتڕۆڵ\n\n👥 بەکارهێنەران: {users}\n💎 VIP: {vip}\n🚫 بلۆككراو: {blocked}\n📥 داونلۆد: {dl}\n⏱ Uptime: {uptime}",
-        "en": "⚙️ Control Panel\n\n👥 Total Users: {users}\n💎 VIP Users: {vip}\n🚫 Blocked: {blocked}\n📥 Total Downloads: {dl}\n⏱ Uptime: {uptime}",
+        "en": "⚙️ Control Panel\n\n👥 Users: {users}\n💎 VIP: {vip}\n🚫 Blocked: {blocked}\n📥 Downloads: {dl}\n⏱ Uptime: {uptime}",
         "ar": "⚙️ لوحة التحكم\n\n👥 المستخدمون: {users}\n💎 VIP: {vip}\n🚫 المحظورون: {blocked}\n📥 التنزيلات: {dl}\n⏱ وقت التشغيل: {uptime}",
     },
     # ── ئامارەکان ──────────────────────────────────────────────────────────────
@@ -262,35 +262,6 @@ STRINGS: dict = {
         "en": "👤 New User!\n\n👤 Name: {name}\n🔗 Username: {uname}\n🆔 ID: {uid}\n🌍 App lang: {app_lang}\n📅 Date: {date}",
         "ar": "👤 مستخدم جديد!\n\n👤 الاسم: {name}\n🔗 المعرف: {uname}\n🆔 ID: {uid}\n🌍 لغة التطبيق: {app_lang}\n📅 التاريخ: {date}",
     },
-    # لە ناو dict ی STRINGS، لە نزیک کلیلەکانی تر:
-    "btn_language": {
-        "ku": "🌐 زمان",
-        "en": "🌐 Language",
-        "ar": "🌐 اللغة",
-    },
-    "choose_language": {
-        "ku": "🌐 تکایە زمانی خۆت هەڵبژێرە:",
-        "en": "🌐 Please choose your language:",
-        "ar": "🌐 الرجاء اختيار لغتك:",
-    },
-    "lang_changed": {
-        "ku": "✅ زمان گۆڕدرا بۆ کوردی.",
-        "en": "✅ Language changed to English.",
-        "ar": "✅ تم تغيير اللغة إلى العربية.",
-    },
-"your_bots_list": {
-    "ku": "📂 <b>بۆتەکانت ({count}):</b>\n🟢 کاردەکات  |  🔴 ڕاگیراوە\n🍓 ڕیاکشن  |  🪪 زانیاری  |  🌤️ کەش و هەوا",
-    "en": "📂 <b>Your Bots ({count}):</b>\n🟢 Running  |  🔴 Stopped\n🍓 Reaction  |  🪪 Info  |  🌤️ Weather",
-    "ar": "📂 <b>بوتاتك ({count}):</b>\n🟢 يعمل  |  🔴 متوقف\n🍓 تفاعل  |  🪪 معلومات  |  🌤️ الطقس",
-},
-"no_bots_created": {
-    "ku": "📭 <b>هیچ بۆتێکت دروست نەکردووە!</b>\n\nکلیک لە '➕ دروستکردنی بۆتی نوێ' بکە.",
-    "en": "📭 <b>You haven't created any bots!</b>\n\nClick on '➕ Create New Bot'.",
-    "ar": "📭 <b>لم تقم بإنشاء أي بوت!</b>\n\nانقر على '➕ إنشاء بوت جديد'.",
-},
-"mk_new_btn": {"ku": "➕ دروستکردنی بۆتی نوێ", "en": "➕ Create New Bot", "ar": "➕ إنشاء بوت جديد"},
-"mk_list_btn": {"ku": "📂 بۆتەکانم", "en": "📂 My Bots", "ar": "📂 بوتاتي"},
-"mk_stats_btn": {"ku": "📊 ئامارەکانم", "en": "📊 My Stats", "ar": "📊 إحصائياتي"},
     # ── دوگمەکانی گشتی ──────────────────────────────────────────────────────
     "btn_back":   {"ku": "🔙 گەڕانەوە",  "en": "🔙 Back",   "ar": "🔙 رجوع"},
     "btn_cancel": {"ku": "❌ هەڵوەشاندنەوە", "en": "❌ Cancel", "ar": "❌ إلغاء"},
@@ -299,16 +270,13 @@ STRINGS: dict = {
     "btn_refresh":{"ku": "🔄 نوێکردنەوە", "en": "🔄 Refresh", "ar": "🔄 تحديث"},
 }
 
-async def get_lang(uid: int) -> str:
-    """زمانی بەکارهێنەر برگەردێنێت، سەرەتا لە داتابەیسدا دەگەڕێت، پاشان CFG default"""
-    user_data = await db_get(f"users/{uid}")
-    if user_data and user_data.get("lang"):
-        return user_data["lang"]
+def get_lang(uid: int) -> str:
+    """زمانی بەکارهێنەر برگەردێنێت، بە پشتیوانی CFG default"""
     return CFG.get("default_lang", "ku")
 
-async def T(uid: int, key: str, **kwargs) -> str:
+def T(uid: int, key: str, **kwargs) -> str:
     """ترجمەی string بە زمانی بەکارهێنەر"""
-    lang = await get_lang(uid)
+    lang = get_lang(uid)
     val = STRINGS.get(key, {}).get(lang) or STRINGS.get(key, {}).get("ku", key)
     return val.format(**kwargs) if kwargs else val
 
@@ -514,15 +482,15 @@ def IKB(text, cbd): return InlineKeyboardButton(text, callback_data=cbd)
 def IKU(text, url): return InlineKeyboardButton(text, url=url)
 
 # ── مینیوی سەرەکی ──────────────────────────────────────────────────────────
-async def kb_main(uid: int) -> InlineKeyboardMarkup:
+def kb_main(uid: int) -> InlineKeyboardMarkup:
     rows = [
-        [IKB(await T(uid, "mk_new_btn"), "mk_new"), IKB(await T(uid, "mk_list_btn"), "mk_list")],
-        [IKB(await T(uid, "mk_stats_btn"), "mk_stats"), IKB(await T(uid, "btn_language"), "choose_lang_menu")],
+        [IKB("➕ دروستکردنی بۆتی نوێ", "mk_new"), IKB("📂 بۆتەکانم", "mk_list")],
+        [IKB("📊 ئامارەکانم", "mk_stats")],
     ]
     if uid == OWNER_ID:
-        rows[1] = [IKB("👑 پانێلی سەرەکی", "panel_unified"), IKB(await T(uid, "mk_stats_btn"), "mk_stats"), IKB(await T(uid, "btn_language"), "choose_lang_menu")]
+        rows[1] = [IKB("👑 پانێلی سەرەکی", "panel_unified"), IKB("📊 ئامارەکان", "mk_stats")]
     elif uid in admins_set or uid in super_admins_set:
-        rows[1] = [IKB("⚙️ پانێلی کۆنترۆڵ", "panel_unified"), IKB(await T(uid, "mk_stats_btn"), "mk_stats"), IKB(await T(uid, "btn_language"), "choose_lang_menu")]
+        rows[1] = [IKB("⚙️ پانێلی کۆنترۆڵ", "panel_unified"), IKB("📊 ئامارەکانم", "mk_stats")]
     return IKM(rows)
 
 def kb_main_admin(uid: int) -> InlineKeyboardMarkup:
@@ -1523,8 +1491,8 @@ async def show_bot_list(update: Update, uid: int):
     mine  = {k: v for k, v in all_b.items() if v.get("owner") == uid}
     if not mine:
         await send_and_track(update, uid,
-            await T(uid, "no_bots_created"),
-            parse_mode="HTML", reply_markup=await kb_main(uid),  # گۆڕانکاری: await kb_main
+            "📭 <b>هیچ بۆتێکت دروست نەکردووە!</b>\n\nکلیک لە '➕ دروستکردنی بۆتی نوێ' بکە.",
+            parse_mode="HTML", reply_markup=kb_main(uid),
         )
         return
     rows = []
@@ -1533,12 +1501,13 @@ async def show_bot_list(update: Update, uid: int):
         btype = info.get("type","reaction")
         ticon = "🍓" if btype == "reaction" else ("🌤️" if btype == "weather" else "🪪")
         rows.append([IKB(f"{st} {ticon} @{info.get('bot_username','Bot')}", f"sel_bot_{bid_k}")])
-    rows.append([IKB(await T(uid, "btn_back"), "back_home")])  # گۆڕانکاری: await T و کلیلی btn_back
+    rows.append([IKB("🔙 گەڕانەوە بۆ سەرەتا", "back_home")])
     await send_and_track(update, uid,
-        await T(uid, "your_bots_list", count=len(mine)),  # گۆڕانکاری: await T
+        f"‏📂 <b>بۆتەکانت ({len(mine)}):</b>\n‏🟢 کاردەکات  |  🔴 ڕاگیراوە\n‏🍓 ڕیاکشن  |  🪪 زانیاری  |  🌤️ کەش و هەوا",
         parse_mode="HTML",
         reply_markup=IKM(rows),
     )
+
 
 async def show_bot_control(update: Update, uid: int, bid: str, info: dict):
     R = "\u200f"  # RTL mark
@@ -3584,7 +3553,7 @@ async def show_bot_list_cq(query, uid: int):
     all_b = await db_get("managed_bots") or {}
     mine  = {k: v for k, v in all_b.items() if v.get("owner") == uid}
     if not mine:
-        await safe_edit(query, await T(uid, "no_bots_created"), await kb_main(uid))
+        await safe_edit(query, "📭 <b>هیچ بۆتێکت دروست نەکردووە!</b>\n\nکلیک لە '➕ دروستکردنی بۆتی نوێ' بکە.", kb_main(uid))
         return
     rows = []
     for bid_k, info in mine.items():
@@ -3592,9 +3561,9 @@ async def show_bot_list_cq(query, uid: int):
         btype = info.get("type","reaction")
         ticon = "🍓" if btype=="reaction" else ("🌤️" if btype=="weather" else "🪪")
         rows.append([IKB(f"{st} {ticon} @{info.get('bot_username','Bot')}", f"sel_bot_{bid_k}")])
-    rows.append([IKB(await T(uid, "btn_back"), "back_home")])
+    rows.append([IKB("🔙 گەڕانەوە بۆ سەرەتا", "back_home")])
     await safe_edit(query,
-        await T(uid, "your_bots_list", count=len(mine)),
+        f"📂 <b>بۆتەکانت ({len(mine)}):</b>\n🟢 کاردەکات  |  🔴 ڕاگیراوە\n🍓 ڕیاکشن  |  🪪 زانیاری  |  🌤️ کەش و هەوا",
         IKM(rows))
 
 async def show_bot_control_cq(query, uid: int, bid: str, info: dict):
@@ -3752,25 +3721,6 @@ async def master_callback(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         txt_msg, kb = await _build_start_content(uid)
         await safe_edit(query, txt_msg, kb)
         return
-
-if data == "choose_lang_menu":
-    kb = IKM([
-        [IKB("کوردی (سۆرانی)", "set_lang_ku")],
-        [IKB("English", "set_lang_en")],
-        [IKB("العربية", "set_lang_ar")],
-        [IKB(await T(uid, "btn_back"), "back_home")]
-    ])
-    await safe_edit(query, await T(uid, "choose_language"), kb)
-    return
-
-if data.startswith("set_lang_"):
-    lang_code = data[9:]  # ku, en, ar
-    await db_patch(f"users/{uid}", {"lang": lang_code})
-    await safe_answer(query, await T(uid, "lang_changed"), alert=True)
-    # دووبارە ناردنی پەیامی سەرەکی بە زمانی نوێ
-    txt_msg, kb = await _build_start_content(uid)
-    await safe_edit(query, txt_msg, kb)
-    return
 
     # mk_* buttons
     if data == "mk_new":

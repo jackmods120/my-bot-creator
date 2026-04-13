@@ -1,0 +1,4 @@
+httpx==0.24.1
+python-telegram-bot==20.7
+firebase-admin==6.2.0
+fastapi==0.104.1
